@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { useQuery } from '@tanstack/react-query'; // Correct import for the new library
+import { useQuery } from '@tanstack/react-query';
+import { PaginatedResponse, Movie } from '../types'; // Import the types
 
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 const API_URL = 'https://api.themoviedb.org/3';
@@ -29,23 +30,24 @@ const fetchMovieDetails = (movieId: string) => {
 
 // React Query hooks with the new object-based syntax
 export const usePopularMovies = (page: number) => {
-  return useQuery({
+  return useQuery<PaginatedResponse>({
     queryKey: ['popularMovies', page],
     queryFn: () => fetchPopularMovies(page),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // Use the correct property
   });
 };
 
 export const useSearchMovies = (query: string, page: number) => {
-  return useQuery({
+  return useQuery<PaginatedResponse>({
     queryKey: ['searchMovies', query, page],
     queryFn: () => searchMovies(query, page),
     enabled: !!query,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // Also update this one
   });
 };
 
 export const useMovieDetails = (movieId: string) => {
+  // Assuming a different type for movie details
   return useQuery({
     queryKey: ['movieDetails', movieId],
     queryFn: () => fetchMovieDetails(movieId),
@@ -54,4 +56,4 @@ export const useMovieDetails = (movieId: string) => {
 };
 
 // Re-export the types you need
-export type { Movie } from '../types';
+export type { Movie, PaginatedResponse };
