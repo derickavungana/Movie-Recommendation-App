@@ -1,9 +1,10 @@
+// src/services/authService.ts
+
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, Auth, User } from 'firebase/auth';
 
-let auth: any;
+let auth: Auth | undefined; // Correctly type the variable
 
-// Only initialize Firebase on the client side (in the browser)
 if (typeof window !== 'undefined') {
     const firebaseConfig = {
         apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,8 +18,8 @@ if (typeof window !== 'undefined') {
     auth = getAuth(app);
 }
 
-// Explicitly define the types for email and password as strings
 export const login = async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase Auth not initialized.'); // Add a check
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return userCredential.user;
@@ -30,8 +31,8 @@ export const login = async (email: string, password: string) => {
     }
 };
 
-// Explicitly define the types for email and password as strings
 export const signup = async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase Auth not initialized.'); // Add a check
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         return userCredential.user;
@@ -44,16 +45,14 @@ export const signup = async (email: string, password: string) => {
 };
 
 export const logout = async () => {
-    if (auth) {
+    if (auth) { // A simpler check here
         await signOut(auth);
     }
 };
 
-// Use the specific User type from Firebase Auth
 export const onAuthStateChangedListener = (callback: (user: User | null) => void) => {
     if (auth) {
         return onAuthStateChanged(auth, callback);
     }
-    // Return an empty function for server-side to prevent errors
     return () => {};
 };
