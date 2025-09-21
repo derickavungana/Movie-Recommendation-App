@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth'; // Import the User type
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -43,6 +43,7 @@ export const logout = async () => {
   await signOut(auth);
 };
 
-export const onAuthStateChangedListener = (callback: (user: any) => void) => {
+// Use the specific User type from Firebase Auth
+export const onAuthStateChangedListener = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
