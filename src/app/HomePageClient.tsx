@@ -9,7 +9,7 @@ import Pagination from '../components/Pagination';
 import SearchBar from '../components/SearchBar';
 import AuthStatus from './AuthStatus';
 
-// Define the types
+// Define the types and export them for use in other files if needed
 interface Movie {
   id: number;
   title: string;
@@ -28,6 +28,7 @@ const HomePageClient = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Explicitly type the data returned from the hooks
   const { data: popularMovies, isLoading: isPopularLoading, isError: isPopularError } = usePopularMovies(currentPage);
   const { data: searchResults, isLoading: isSearchLoading } = useSearchMovies(searchQuery, currentPage);
 
@@ -36,7 +37,6 @@ const HomePageClient = () => {
   const totalPages = searchQuery ? searchResults?.total_pages : popularMovies?.total_pages;
   const isLoading = searchQuery ? isSearchLoading : isPopularLoading;
 
-  // Render a loading state, error message, or "no movies" message
   if (isLoading) {
     return <Loader />;
   }
