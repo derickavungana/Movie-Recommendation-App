@@ -1,14 +1,28 @@
-// src/app/HomePageClient.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePopularMovies, useSearchMovies, Movie } from '../services/tmdbService';
-import MovieCard from '../components/MovieCard'; // Default import
+import { usePopularMovies, useSearchMovies } from '../services/tmdbService';
+import MovieCard from '../components/MovieCard';
 import Loader from '../components/Loader';
 import Pagination from '../components/Pagination';
 import SearchBar from '../components/SearchBar';
 import AuthStatus from './AuthStatus';
+
+// Define the types
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  vote_average: number;
+}
+
+interface PaginatedResponse {
+  page: number;
+  results: Movie[];
+  total_pages: number;
+  total_results: number;
+}
 
 const HomePageClient = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,9 +31,19 @@ const HomePageClient = () => {
   const { data: popularMovies, isLoading: isPopularLoading, isError: isPopularError } = usePopularMovies(currentPage);
   const { data: searchResults, isLoading: isSearchLoading } = useSearchMovies(searchQuery, currentPage);
 
-  const movies = searchQuery ? searchResults?.results : popularMovies?.results;
+  // Use nullish coalescing to provide a default empty array
+  const movies = (searchQuery ? searchResults?.results : popularMovies?.results) ?? [];
   const totalPages = searchQuery ? searchResults?.total_pages : popularMovies?.total_pages;
   const isLoading = searchQuery ? isSearchLoading : isPopularLoading;
+
+  // Render a loading state, error message, or "no movies" message
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (isPopularError) {
+    return <p className="text-red-500 text-center">Failed to fetch movies. Please check your network connection.</p>;
+  }
 
   return (
     <>
@@ -29,18 +53,19 @@ const HomePageClient = () => {
           <AuthStatus />
         </div>
         
-        {isLoading && <Loader />}
-        {isPopularError && <p className="text-red-500">Failed to fetch movies. Please check your network connection.</p>}
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
-          {movies?.map((movie: Movie) => (
-            <Link key={movie.id} href={`/movies/${movie.id}`}>
-              <div className="cursor-pointer">
-                <MovieCard movie={movie} />
-              </div>
-            </Link>
-          ))}
-        </div>
+        {movies.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+            {movies.map((movie) => (
+              <Link key={movie.id} href={`/movies/${movie.id}`}>
+                <div className="cursor-pointer">
+                  <MovieCard movie={movie} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-xl mt-10">No movies found.</p>
+        )}
         
         {totalPages && totalPages > 1 && (
           <Pagination
