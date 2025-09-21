@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+// Assuming usePopularMovies and useSearchMovies return a PaginatedResponse
 import { usePopularMovies, useSearchMovies } from '../services/tmdbService';
 import MovieCard from '../components/MovieCard';
 import Loader from '../components/Loader';
@@ -9,7 +10,7 @@ import Pagination from '../components/Pagination';
 import SearchBar from '../components/SearchBar';
 import AuthStatus from './AuthStatus';
 
-// Define the types and export them for use in other files if needed
+// Define the types
 interface Movie {
   id: number;
   title: string;
@@ -28,11 +29,13 @@ const HomePageClient = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Explicitly type the data returned from the hooks
-  const { data: popularMovies, isLoading: isPopularLoading, isError: isPopularError } = usePopularMovies(currentPage);
-  const { data: searchResults, isLoading: isSearchLoading } = useSearchMovies(searchQuery, currentPage);
+  // Explicitly type the data using the PaginatedResponse interface
+  const { data: popularMovies, isLoading: isPopularLoading, isError: isPopularError } = 
+    usePopularMovies(currentPage);
 
-  // Use nullish coalescing to provide a default empty array
+  const { data: searchResults, isLoading: isSearchLoading } = 
+    useSearchMovies(searchQuery, currentPage);
+
   const movies = (searchQuery ? searchResults?.results : popularMovies?.results) ?? [];
   const totalPages = searchQuery ? searchResults?.total_pages : popularMovies?.total_pages;
   const isLoading = searchQuery ? isSearchLoading : isPopularLoading;
