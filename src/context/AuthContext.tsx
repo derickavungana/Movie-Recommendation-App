@@ -1,30 +1,33 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChangedListener } from '../services/authService';
-import { User } from 'firebase/auth'; // Import the User type from Firebase
+import { User } from 'firebase/auth';
 
 interface AuthContextType {
-  currentUser: User | null; // Use the specific User type
+  currentUser: User | null;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null); // Use the specific User type
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChangedListener((user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
+    // Ensure the listener is only attached on the client side
+    if (typeof window !== 'undefined') {
+      const unsubscribe = onAuthStateChangedListener((user) => {
+        setCurrentUser(user);
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }
   }, []);
 
   const value = { currentUser, loading };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
